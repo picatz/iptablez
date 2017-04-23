@@ -2,7 +2,7 @@
 
 A friendly Ruby API to `iptables`. With a squid for a mascot.
 
-##### 🚧  Development Notice
+### 🚧  Development Notice
 
 Iptablez is still under development.
 
@@ -16,7 +16,7 @@ TODO
 
 ## 🐚  iptablez-shell
 
-Iptablez provides an interactive shell via the `iptablez-shell` command.
+This is a TODO. Iptablez provides an interactive shell via the `iptablez-shell` command.
 
 ```ruby
 $ iptablez-shell
@@ -25,18 +25,18 @@ $ iptablez-shell
 
 ## 🦑  iptablez-cli
 
-Iptablez provides a simple command-line application via the `iptablez-cli` command.
+This is a TODO. Iptablez provides a simple command-line application via the `iptablez-cli` command.
 
 ```shell
 $ iptablez-cli -h
 ```
 ##  iptablez-web
 
-Iptablez provides a web application that can be started via the `iptablez-web` command.
+This is a TODO. Iptablez provides a web application that can be started via the `iptablez-web` command.
 
 ##  iptablez-api
 
-A simple REST API that can be started via the `iptablez-api` command.
+This is a TODO. A simple REST API that can be started via the `iptablez-api` command.
 
 ## License
 
