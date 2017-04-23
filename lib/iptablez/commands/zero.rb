@@ -1,5 +1,6 @@
 module Iptablez
   module Commands
+    # @todo
     module Zero 
       def self.all
         o, e, s = Open3.capture3(Iptablez.bin_path, '-Z')      

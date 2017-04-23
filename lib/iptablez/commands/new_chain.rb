@@ -4,10 +4,7 @@ module Iptablez
       # Move on Module
       include MoveOn
 
-      class ChainAlreadyExistsError < ArgumentError; end
-
       CHAIN_ALREADY_EXITS_ERROR = 'iptables: Chain already exists.'
-
       KNOWN_ERRORS = [CHAIN_ALREADY_EXITS_ERROR] 
 
       # @api private

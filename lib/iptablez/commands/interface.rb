@@ -1,5 +1,6 @@
 module Iptablez
   module Commands
+    # @todo Add inline document to this.
     module Interface 
     
       def self.delete_chain(name: false, all: false)

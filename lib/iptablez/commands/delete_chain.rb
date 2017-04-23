@@ -6,12 +6,6 @@ module Iptablez
       # Move on Module
       include MoveOn
 
-      # Simple Error class to document errors that occur when a chain doesn't exist.
-      # @author Kent 'picat' Gruber
-      class ChainExistenceError < ArgumentError; end
-      
-      class ChainNotEmpty < StandardError ; end
-
       NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
       CHAIN_NOT_EMPTY      = 'iptables: Directory not empty.'.freeze
 

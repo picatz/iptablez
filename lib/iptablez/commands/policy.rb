@@ -4,10 +4,6 @@ module Iptablez
       # Move on Module
       include MoveOn
 
-      # Simple Error class to document errors that occur when a chain doesn't exist.
-      # @author Kent 'picat' Gruber
-      class ChainExistenceError < ArgumentError; end
-
       NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
       KNOWN_ERRORS         = [NO_CHAIN_MATCH_ERROR].freeze
       

@@ -1,7 +1,6 @@
 module Iptablez
   module Commands
-    # The namespace to describe the `iptables` `-X` argument to delete a chain.
-    # @author Kent 'picat' Gruber
+    # @todo Document this module. Kind'a important.
     module MoveOn
       # @api private
       # Determine if the method should should move on with its life when things go wrong.

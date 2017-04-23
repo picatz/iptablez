@@ -3,15 +3,7 @@ module Iptablez
     module List 
       # Move on Module
       include MoveOn
-      
-      # Simple Error class to document errors that occur when a chain doesn't exist.
-      # @author Kent 'picat' Gruber
-      class ChainExistenceError < ArgumentError; end
-      
-      # Simple Error class to document errors that occur when a user/process lacks permissions.
-      # @author Kent 'picat' Gruber
-      class InvalidRuleIndexError < StandardError; end
-
+     
       UNKOWN_OPTION        = 'unknown option'.freeze
       NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
       PERMISSION_DENIED    = 'Permission denied (you must be root)'.freeze
