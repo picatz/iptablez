@@ -21,8 +21,8 @@ module Iptablez
       chains = Commands::List.full.find_all do |line| 
         line if line.split[0] == "Chain" 
       end.map(&:split).collect { |array| array[1] }
-      return chains unless block_given?
-      chains.each { |c| yield c }
+      chains.each { |c| yield c } if block_given?
+      return chains 
     end
     
     # List the default policies for default chains.
