@@ -1,0 +1,69 @@
+module Iptablez
+  module Commands
+    module Policy 
+      # Move on Module
+      include MoveOn
+
+      # Simple Error class to document errors that occur when a chain doesn't exist.
+      # @author Kent 'picat' Gruber
+      class ChainExistenceError < ArgumentError; end
+
+      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
+      KNOWN_ERRORS         = [NO_CHAIN_MATCH_ERROR].freeze
+      
+      # @api private
+      # Determine a given error. Optionally a chain can be used to provide better context.
+      private_class_method def self.determine_error(error:, chain: false)
+        if error == NO_CHAIN_MATCH_ERROR
+          raise ChainExistenceError, "#{chain} doesn't exist!"
+        else
+          raise error
+        end
+      end
+
+      def self.all(target:, error: false, continue: !error)
+        if target
+          chains(names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
+            yield result if block_given?
+          end
+        else
+          Iptables::Chains.policies do |result|
+            yield result
+          end
+        end  
+      end
+
+      def self.defaults(target:, error: false, continue: !error)
+        chains(names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
+          yield result if block_given?
+        end
+      end
+
+      def self.chain(name:, target:, error: false, continue: !error)
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-P', name, target)      
+        e.strip!
+        if s.success?
+          yield [name, target, true] if block_given?
+          return true
+        elsif MoveOn.continue?(continue: continue, message: e, known_errors: KNOWN_ERRORS)
+          yield [name, target, false] if block_given?
+          return false
+        else
+          determine_error(chain: name, error: e)
+        end
+      end
+
+      def self.chains(names:, target:, error: false, continue: !error)
+        results = {}
+        names.each do |name|
+          results[name] = {}
+          results[name][target] = chain(name: name, target: target, continue: continue) do |result|
+            yield result if block_given?
+          end
+        end
+        results
+      end
+
+    end
+  end
+end

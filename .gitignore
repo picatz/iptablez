@@ -1,0 +1,14 @@
+/.bundle/
+/.yardoc
+/Gemfile.lock
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/.vagrant/
+ubuntu-xenial-16.04-cloudimg-console.log
+# Vagrantfile
+# rspec failure tracking
+.rspec_status
