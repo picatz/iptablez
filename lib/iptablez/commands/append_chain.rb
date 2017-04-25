@@ -28,14 +28,10 @@ module Iptablez
       # @param continue [Boolean] Determine if operations should continue despite errors.
       #
       # @example Basic Usage
-      #   Iptablez::Commands::DeleteChain.chain(name: "dogs")
-      #   # => false
-      #   Iptablez::Commands::DeleteChain.chain(name: "cats")
+      #   Iptablez::Commands::AppendChain.chain(name: "dogs")
       #   # => true
-      # @example Basic Usage with a Block
-      #   Iptablez::Commands::DeleteChain.chain(name: "dogs") do |name, result|
-      #     puts "#{name} deleted!" if result
-      #   end
+      #   Iptablez::Commands::List.chain(name: "kittens")
+      #   # => ["all  --  anywhere             anywhere"]
       #
       # @yield  [String, Boolean] The +name+ of the chain and +result+ of the operation if a block if given.
       # @return [Boolean]         The result of the operation.

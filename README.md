@@ -10,9 +10,7 @@ Iptablez is still under development.
 
     $ gem install iptablez
 
-## Usage
-
-### ⛓  Chains
+## ⛓  Usage
 
 Easily list all of the `iptables` chains.
 
@@ -40,7 +38,7 @@ Create a new user defined chain(s)?
 Iptablez::Chains.create(name: "dogs")
 # => true
 
-Iptablez::Chains.create(name: ["dogs", "cats"])
+Iptablez::Chains.create(names: ["dogs", "cats"])
 # => {"dogs"=>false, "cats"=>true}
 ```
 
