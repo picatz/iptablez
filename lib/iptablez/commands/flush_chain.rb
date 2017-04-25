@@ -33,7 +33,8 @@ module Iptablez
       #     puts "#{name} flushed" if result
       #   end
       def self.chain(name:, error: false, continue: !error)
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-F', name)      
+       name = name.to_s unless name.is_a? String 
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-F', name.shellescape)      
         e.strip!
         if s.success?
           yield [name, true] if block_given?

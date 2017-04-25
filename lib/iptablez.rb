@@ -1,7 +1,10 @@
+#!/usr/bin/env ruby
+
+require "shellwords"
 require "open3"
 
-require "iptablez/version"
-require "iptablez/helpers"
+require "iptablez/helpers/version"
+require "iptablez/helpers/helpers"
 require "iptablez/commands/helpers/move_on"
 require "iptablez/commands/helpers/errors"
 require "iptablez/commands/helpers/argument_helpers"

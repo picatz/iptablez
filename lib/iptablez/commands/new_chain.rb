@@ -31,7 +31,8 @@ module Iptablez
       # @yield  [String, Boolean] The +name+ of the chain and +result+ of the operation if a block if given.
       # @return [String, Boolean] Key value pairing of the given chain +name+ and the +result+ of the operation.
       def self.chain(name:, error: false, continue: !error)
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-N', name)
+        name = name.to_s unless name.is_a? String
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-N', name.shellescape)
         e.strip! # remove new line 
         if s.success?
           yield [name, true] if block_given?

@@ -5,22 +5,21 @@ module Iptablez
     # @author Kent 'picat' Gruber
     module ArgumentHelpers
 
-      # @todo
-      #def self.wait(seconds: false)
-      #  if seconds # don't wait forever? :P
-      #    { wait: "-w #{seconds}" }
-      #  else
-      #    { wait: "-w" }
-      #  end
-      #end
+      def self.wait(seconds: false)
+        if seconds # don't wait forever? :P
+          { wait: "-w #{seconds}" }
+        else
+          { wait: "-w" }
+        end
+      end
 
-      #def self.counters(packets:, bytes:)
-      #  { counters: "-c #{packets} #{bytes}" }
-      #end
+      def self.counters(packets:, bytes:)
+        { counters: "-c #{packets} #{bytes}" }
+      end
 
-      #def self.fragment
-      #  { fragment: "-f" }
-      #end
+      def self.fragment
+        { fragment: "-f" }
+      end
 
       def self.destination(dst:, ip: true, port: !ip)
         unless port
@@ -76,8 +75,6 @@ module Iptablez
         { protocol: "-p #{protocol}" }
       end
 
-      # @todo Kent wtf is this shit.
-      # Fuckin' works though.
       # @example Basic Usage
       #   # note how jump: is compared to goto:
       #   args = {:goto=>"-g INPUT", :jump=>"INPUT"}
@@ -86,14 +83,14 @@ module Iptablez
       #   # => {:jump=>"-j INPUT", :goto=>"-g INPUT"}
       def self.normalize_arguments(args)
         results = {}
-        results[:jump]             = normalize_jump(args[:jump])[:jump]                                            if args[:jump]
-        results[:goto]             = normalize_goto(args[:goto])[:goto]                                            if args[:goto]
-        results[:protocol]         = normalize_protocol(args[:protocol])[:protocol]                                if args[:protocol]
-        results[:interface]        = normalize_interface(args[:interface])[:interface]                             if args[:interface]
-        results[:source]           = normalize_source(args[:source])[:source]                                      if args[:source]
-        results[:source_port]      = normalize_source(args[:source_port], port: true)[:source_port]                if args[:source_port]
-        results[:destination]      = normalize_destination(args[:destination])[:destination]                       if args[:destination]
-        results[:destination_port] = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination]
+        results[:jump]     = normalize_jump(args[:jump])[:jump]                                 if args[:jump]
+        results[:goto]     = normalize_goto(args[:goto])[:goto]                                 if args[:goto]
+        results[:protocol] = normalize_protocol(args[:protocol])[:protocol]                     if args[:protocol]
+        results[:interface]= normalize_interface(args[:interface])[:interface]                  if args[:interface]
+        results[:src]      = normalize_source(args[:src])[:source]                              if args[:src]
+        results[:sport]    = normalize_source(args[:sport], port: true)[:source_port]           if args[:sport]
+        results[:dst]      = normalize_destination(args[:dst])[:destination]                    if args[:dst]
+        results[:dport]    = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
         results
       end
 

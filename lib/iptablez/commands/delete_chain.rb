@@ -66,7 +66,8 @@ module Iptablez
       #
       # @raise An error will be raised if the +error+ or +continue+ keywords are +true+ and the operation fails.
       def self.chain(name:, error: false, continue: !error)
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-X', name)
+        name = name.to_s unless name.is_a? String
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-X', name.shellescape)
         e.strip! # remove new line
         if s.success?
           yield [name, true] if block_given?

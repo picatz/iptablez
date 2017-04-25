@@ -38,6 +38,8 @@ module Iptablez
       #
       # @raise An error will be raised if the +error+ or +continue+ keywords are +true+ and the operation fails.
       def self.chain(name:, error: false, continue: !error, **args)
+        name = name.to_s unless name.is_a? String
+        name = name.shellescape
         first_arguments = [Iptablez.bin_path, '-A', name]
         args = ArgumentHelpers.normalize_arguments(args).values.map(&:split).flatten # fucking crazy shit here
         cmd = first_arguments + args

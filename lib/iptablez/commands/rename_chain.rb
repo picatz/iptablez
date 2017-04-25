@@ -34,7 +34,9 @@ module Iptablez
       # @yield  [String, String]
       # @return [Boolean] 
       def self.chain(from:, to:, error: false, continue: !error)
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-E', from, to)      
+        to   = to.to_s   unless to.is_a?   String 
+        from = from.to_s unless from.is_a? String
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-E', from.shellescape, to.shellescape)      
         e.strip!
         if s.success?
           yield [from, to, true] if block_given?
