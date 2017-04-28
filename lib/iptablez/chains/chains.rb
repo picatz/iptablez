@@ -169,6 +169,30 @@ module Iptablez
         raise "Cannot use both a single name and multiple names together."
       end
     end 
+    
+    def self.list
+      Commands::List
+    end
+  
+    def self.new_chain
+      Commands::NewChain
+    end
+
+    def self.delete_chain
+      Commands::DeleteChain
+    end
+
+    def self.flush_chain
+      Commands::FlushChain
+    end
+
+    def self.rename_chain
+      Commands::RenameChain
+    end
+
+    def self.append_chain
+      Commands::AppendChain
+    end
 
     def self.create(name: false, names: [], error: false, continue: !error)
       if name
@@ -205,7 +229,7 @@ module Iptablez
         end
       end
     end
-
+    
     def self.rename(from: false, to: false, pairs: {}, error: false, continue: !error)
       if from && to
         Commands::RenameChain.chain(from: from, to: to, continue: continue) do |result|
@@ -220,7 +244,14 @@ module Iptablez
         end
       end
     end
-
+    
+    def self.append(name: false, names: [], error: false, continue: !error, **args)
+      if name
+        Commands::AppendChain.chain(name: name, continue: continue, **args)
+      elsif !names.empty?
+        Commands::AppendChain.chains(names: names, continue: continue, **args)
+      end
+    end
 
   end
 
