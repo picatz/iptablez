@@ -8,7 +8,9 @@ Iptablez is still under development.
 
 ## Installation
 
-    $ gem install iptablez
+Currently, a `pre-release` gem is avaiable to install with the `--pre` flag to help with early testing.
+
+    $ gem install iptablez --pre
 
 ## ⛓  Usage
 
