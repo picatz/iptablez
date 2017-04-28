@@ -205,6 +205,17 @@ module Iptablez
           determine_error(chain: name, error: e)
         end 
       end
+
+      def self.chains(names:, policy: false, error: false, continue: !error)
+        results = {} 
+        names.each do |name|
+          results[name] = chain(name: name, policy: policy, continue: continue) do |name, result|
+            yield [name, result] if block_given?
+          end
+        end
+        results 
+      end
+
     end
   end
 end
