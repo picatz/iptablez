@@ -7,11 +7,16 @@ require 'pry'
 
 include Iptablez
 
+def chains
+  Chains
+end
+
+
 prompt_name = "#{"<コ".red + ":".green + "彡".red} #{"~".blue} "
 
 Pry.config.prompt = [
   proc { |target_self, nest_level, pry|
-    "#{prompt_name}#{":#{nest_level}" unless nest_level.zero?}> "
+    "#{prompt_name}#{":#{nest_level}" unless nest_level.zero?} "
   },
   proc { |target_self, nest_level, pry|
     "#{prompt_name}(#{Pry.view_clip(target_self)})#{":#{nest_level}" unless nest_level.zero?}* "
