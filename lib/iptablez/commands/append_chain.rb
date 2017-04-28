@@ -57,6 +57,16 @@ module Iptablez
         end
       end
 
+      def self.chains(names:, error: false, continue: !error, **args)
+        results = {} 
+        names.each do |name|
+          results[name] = chain(name: name, continue: continue, **args) do |name, result|
+            yield [name, result] if block_given?
+          end
+        end
+        results 
+      end
+
     end
   end
 end
