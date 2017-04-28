@@ -88,9 +88,13 @@ module Iptablez
         results[:protocol] = normalize_protocol(args[:protocol])[:protocol]                     if args[:protocol]
         results[:interface]= normalize_interface(args[:interface])[:interface]                  if args[:interface]
         results[:src]      = normalize_source(args[:src])[:source]                              if args[:src]
+        results[:src]      = normalize_source(args[:source])[:source]                           if args[:source]
         results[:sport]    = normalize_source(args[:sport], port: true)[:source_port]           if args[:sport]
+        results[:sport]    = normalize_source(args[:source_port], port: true)[:source_port]     if args[:source_port]
         results[:dst]      = normalize_destination(args[:dst])[:destination]                    if args[:dst]
+        results[:dst]      = normalize_destination(args[:destination])[:destination]            if args[:destination]
         results[:dport]    = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
+        results[:dport]    = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination_port] # lol
         results
       end
 
