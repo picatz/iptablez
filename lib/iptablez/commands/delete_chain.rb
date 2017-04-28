@@ -38,7 +38,7 @@ module Iptablez
       # @return [Hash] Key value pairing of each user defined chain and boolean if it has been successfully deleted.
       def self.all(error: false, continue: !error)
         results = {}
-        chains(names: Iptablez::Chains.user_defined, continue: continue, fly_by: fly_by) do |name, result|
+        chains(names: Iptablez::Chains.user_defined, continue: continue) do |name, result|
           yield [name, result] if block_given?
           results[name] = result
         end
