@@ -169,7 +169,19 @@ module Iptablez
         raise "Cannot use both a single name and multiple names together."
       end
     end 
+   
+    def self.stats
+      Commands::Stats
+    end
     
+    def self.packets
+      Commands::Stats::Packets
+    end
+
+    def self.bytes
+      Commands::Stats::Bytes
+    end
+
     def self.list
       Commands::List
     end
