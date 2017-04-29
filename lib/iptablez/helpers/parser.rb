@@ -1,5 +1,6 @@
 module Iptablez
 
+  # @todo This whole thing needs some documentation.
   module Parser
     
     # @todo Document better
@@ -31,6 +32,7 @@ module Iptablez
       results
     end    
 
+    # iptables -S
     def self.list_rules_to_array(output = `iptables -S`)
       results = []
       output.split("\n").each do |line|  
@@ -41,6 +43,7 @@ module Iptablez
       results
     end
 
+    # iptables -S
     def self.list_rules_to_policies(output = `iptables -S`)
       results = {}
       output.split("\n").each do |line|
@@ -52,9 +55,10 @@ module Iptablez
       results
     end
 
-    def self.list_rules_to_policy(policy, output = `iptables -S`)
+    # iptables -S
+    def self.list_rules_to_policy(chain, output = `iptables -S`)
       output.split("\n").each do |line|
-        next unless line.match(/-P\s#{policy}/)
+        next unless line.match(/-P\s#{chain}/)
         chain, rule = line.split[1,2]
         yield [chain, rule] if block_given?
         return { chain => rule }

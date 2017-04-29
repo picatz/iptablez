@@ -17,6 +17,34 @@ module Iptablez
         end
       end
 
+      def self.list(chain: false, chains: false)
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-S')
+        e.strip!
+        if s.success?
+          if chain
+            list_rules_to_policy(chain, o)
+          elsif chains
+            results = {}
+            Iptablez::Parser.list_rules_to_policy(o) do |c, rule|
+              next unless chains.include?(c)
+              yield [chain, result]
+              result[chain] = result
+            end
+            results
+          else
+            Iptablez::Parser.list_rules_to_policies(o) do |result|
+              yield result if block_given?
+            end
+          end
+        elsif MoveOn.continue?(continue: continue, message: e, known_errors: KNOWN_ERRORS)
+          yield [name, target, false] if block_given?
+          return false
+        else
+          determine_error(chain: name, error: e)
+        end
+      end
+
+
       def self.all(target:, error: false, continue: !error)
         if target
           chains(names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
