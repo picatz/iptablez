@@ -118,7 +118,7 @@ module Iptablez
         if arg["-p"] # @todo Check || arg["--protocol"]
           { protocol: arg }
         else
-          goto(target: arg)
+          protocol(protocol: arg)
         end
       end
       
