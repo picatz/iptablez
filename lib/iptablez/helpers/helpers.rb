@@ -3,6 +3,8 @@ module Iptablez
   # Shortcut to get the bin path for `iptables`.
   # @return [String]
   def self.bin_path
+    # @todo Which will fire for ever command to determine iptables path.
+    # Maybe, cache this value and allow the method to be re-called when needed.
     o, e, s = Open3.capture3("which", "iptables")
     return o.strip if s.success?
     raise e
