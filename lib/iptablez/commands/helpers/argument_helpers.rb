@@ -94,6 +94,7 @@ module Iptablez
         results[:dst]      = normalize_destination(args[:dst])[:destination]                    if args[:dst]
         results[:dst]      = normalize_destination(args[:destination])[:destination]            if args[:destination]
         results[:dport]    = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
+        results[:table]    = normalize_table(args[:table])[:table]                              if args[:table] # @todo Verify this works properly.
         results[:dport]    = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination_port] # lol
         results
       end
@@ -111,6 +112,14 @@ module Iptablez
           { goto: arg }
         else
           goto(target: arg)
+        end
+      end
+      
+      def self.normalize_table(arg)
+        if arg["-t"] || arg["--table"]
+          { table: arg }
+        else
+          table(name: arg)
         end
       end
 
