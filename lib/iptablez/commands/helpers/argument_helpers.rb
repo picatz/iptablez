@@ -12,6 +12,10 @@ module Iptablez
           { wait: "-w" }
         end
       end
+      
+      def self.comment(comment:)
+        { comment: "-m comment --comment '#{comment}'" }
+      end
 
       def self.counters(packets:, bytes:)
         { counters: "-c #{packets} #{bytes}" }
@@ -95,6 +99,7 @@ module Iptablez
         results[:dst]      = normalize_destination(args[:destination])[:destination]            if args[:destination]
         results[:dport]    = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
         results[:table]    = normalize_table(args[:table])[:table]                              if args[:table] # @todo Verify this works properly.
+        results[:comment]  = normalize_comment(args[:comment])[:comment]                        if args[:comment] # @todo Verify this works properly.
         results[:dport]    = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination_port] # lol
         results
       end
@@ -120,6 +125,14 @@ module Iptablez
           { table: arg }
         else
           table(name: arg)
+        end
+      end
+      
+      def self.normalize_comment(arg)
+        if arg["-m comment"] || arg["--match comment"]
+          { comment: arg }
+        else
+          comment(comment: arg)
         end
       end
 
