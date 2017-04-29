@@ -13,9 +13,12 @@ module Iptablez
       # @api private
       # Determine a given error. Optionally a chain can be used to provide better context.
       private_class_method def self.determine_error(error:, chain: false)
+        # @todo Catch better erorrs. 
+        # Default will probably not ChainNotEmpty if it's not a ChainExistenceError.
         if error == NO_CHAIN_MATCH_ERROR
           raise ChainExistenceError, "#{chain} doesn't exist!"
         elsif
+          warn "Don't believe everything a program says!"
           raise ChainNotEmpty, "#{chain} is not empty! Will probably need to flush (-F) it to delete it!" 
         else
           raise error
