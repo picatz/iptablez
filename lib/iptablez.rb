@@ -5,6 +5,8 @@ require "open3"
 
 require "iptablez/helpers/version"
 require "iptablez/helpers/helpers"
+require "iptablez/helpers/parser"
+require "iptablez/helpers/tables"
 require "iptablez/commands/helpers/move_on"
 require "iptablez/commands/helpers/errors"
 require "iptablez/commands/helpers/argument_helpers"

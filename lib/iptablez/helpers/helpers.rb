@@ -16,6 +16,16 @@ module Iptablez
     Commands::Version.number
   end
 
+  # @todo Document this.
+  def self.parse
+    Parser
+  end
+
+  # @todo Document this.
+  def self.tables
+    Tables.defaults
+  end
+
   # Shortcut to list the rules found in a chain of a given +name+ or
   # if no chain is specifcied, list all of the chains.
   # @example Basic Usage

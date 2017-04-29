@@ -45,12 +45,10 @@ module Iptablez
         end
         results = []
         if s.success?
-          o.split("\n").map(&:strip).each do |line|
-            next if line.split[0] == "Chain" || line.split[0] == "target" || line.empty?
+          Iptablez::Parser.list_to_array(o) do |line|
             yield line if block_given?
             results << line
           end
-          results
         elsif MoveOn.continue?(continue: continue, message: e, known_errors: KNOWN_ERRORS)
           return results
         else
@@ -127,7 +125,7 @@ module Iptablez
             number = number.to_s
           end
         end
-        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', chain, number.to_s)      
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', chain, number)      
         e.strip!
         o.strip!
         o = false if o.empty?
@@ -192,13 +190,9 @@ module Iptablez
         end
         e.strip!
         if s.success?
-          results = o.split("\n").map(&:strip).delete_if do |line|
-            line if line.split[0] == "Chain" || line.split[0] == "target"
-          end
-          results.each do |line|
+          Iptablez.parse.list_to_array(o) do |line|
             yield line if block_given?
           end
-          results
         elsif MoveOn.continue?(continue: continue, message: e, known_errors: KNOWN_ERRORS)
           return false
         else
