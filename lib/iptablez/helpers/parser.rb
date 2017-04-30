@@ -66,6 +66,8 @@ module Iptablez
       return false
     end
 
+    # @todo Document.
+    # @see list_line_to_hash
     def self.list_to_hashes(output = `iptables -L`)
       results = []
       output.split("\n").each do |line|
@@ -78,6 +80,8 @@ module Iptablez
       results
     end
     
+    # @todo Document.
+    # @see list_to_hashes
     def self.list_line_to_hash(line)
       return {info: true} if line.match(/^\btarget\s/)
       return {info: true} if line.match(/\spkts\sbytes/)
@@ -89,6 +93,8 @@ module Iptablez
       return rule_line(line: line, types: [:verbose, :numbers])  if line.match(/^\d+\s+\d+\s+\d+\s+\D/) 
     end
 
+    # @todo Document.
+    # @see list_line_to_hash
     def self.chain_line(line)
       line = line.split
       result = {}
@@ -99,6 +105,8 @@ module Iptablez
       result 
     end
 
+    # @todo Document.
+    # @see list_line_to_hash
     def self.rule_line(line:, types:)
       result = {}
       line = line.split
