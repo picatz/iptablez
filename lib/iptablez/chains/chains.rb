@@ -141,7 +141,7 @@ module Iptablez
       DEFAULT.each { |c| yield c } 
     end
 
-    def self.policy?(name:, policy:, names: [])
+    def self.policy?(name: false, policy: false, names: [])
       if name && names.empty?
         r = if policies[name] == policy
               true
@@ -154,7 +154,7 @@ module Iptablez
         r = {} 
         names.each do |n| 
           begin
-            r[n] = if policies[name] == policy
+            r[n] = if policies[n] == policy
                      true 
                    else
                      false
