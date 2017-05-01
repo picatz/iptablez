@@ -2,6 +2,7 @@ module Iptablez
   module Commands
     # Kent, wtf is this shit?
     # Don't worry about iiiiit bruuuhhhhhvvv.
+    # @todo Make this better.
     # @author Kent 'picat' Gruber
     module ArgumentHelpers
 
@@ -49,11 +50,6 @@ module Iptablez
         { source_port: "-sport #{src}" }
       end
 
-      # @todo
-      #def self.ip_range(from:, to:)
-      #  { ip_range: "-m iprange #{fromt}-#{to}" }
-      #end
-
       def self.table(name: "filter")
         { table: "-t #{name}" }
       end
@@ -79,6 +75,38 @@ module Iptablez
         { protocol: "-p #{protocol}" }
       end
 
+      def self.limit(limit:)
+        { limit: "-m limit --limit #{limit}" }
+      end
+      
+      def self.log_prefix(log_prefix:)
+        { log_prefix: "--log-prefix '#{log_prefix}'" }
+      end
+
+      def self.state(state:)
+        { state: "-m state --state #{state}"}
+      end
+      
+      def self.states(states:)
+        { state: "-m state --state #{states.join(",")}" }
+      end
+      
+      def self.to(to:)
+        { to: "--to #{to}" }
+      end
+      
+      def self.icmp_type(icmp_type:)
+        { icmp_type: "--icmp-type #{icmp_type}" }
+      end
+      
+      def self.ip_range(ip_range:)
+        { ip_range: "-m iprange" }
+      end
+      
+      def self.log_level(log_level:)
+        { log_level: "--log-level #{log_level}" }
+      end
+
       # @example Basic Usage
       #   # note how jump: is compared to goto:
       #   args = {:goto=>"-g INPUT", :jump=>"INPUT"}
@@ -87,20 +115,26 @@ module Iptablez
       #   # => {:jump=>"-j INPUT", :goto=>"-g INPUT"}
       def self.normalize_arguments(args)
         results = {}
-        results[:jump]     = normalize_jump(args[:jump])[:jump]                                 if args[:jump]
-        results[:goto]     = normalize_goto(args[:goto])[:goto]                                 if args[:goto]
-        results[:protocol] = normalize_protocol(args[:protocol])[:protocol]                     if args[:protocol]
-        results[:interface]= normalize_interface(args[:interface])[:interface]                  if args[:interface]
-        results[:src]      = normalize_source(args[:src])[:source]                              if args[:src]
-        results[:src]      = normalize_source(args[:source])[:source]                           if args[:source]
-        results[:sport]    = normalize_source(args[:sport], port: true)[:source_port]           if args[:sport]
-        results[:sport]    = normalize_source(args[:source_port], port: true)[:source_port]     if args[:source_port]
-        results[:dst]      = normalize_destination(args[:dst])[:destination]                    if args[:dst]
-        results[:dst]      = normalize_destination(args[:destination])[:destination]            if args[:destination]
-        results[:dport]    = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
-        results[:table]    = normalize_table(args[:table])[:table]                              if args[:table] # @todo Verify this works properly.
-        results[:comment]  = normalize_comment(args[:comment])[:comment]                        if args[:comment] # @todo Verify this works properly.
-        results[:dport]    = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination_port] # lol
+        results[:jump]       = normalize_jump(args[:jump])[:jump]                                 if args[:jump]
+        results[:goto]       = normalize_goto(args[:goto])[:goto]                                 if args[:goto]
+        results[:protocol]   = normalize_protocol(args[:protocol])[:protocol]                     if args[:protocol]
+        results[:interface]  = normalize_interface(args[:interface])[:interface]                  if args[:interface]
+        results[:src]        = normalize_source(args[:src])[:source]                              if args[:src]
+        results[:src]        = normalize_source(args[:source])[:source]                           if args[:source]
+        results[:sport]      = normalize_source(args[:sport], port: true)[:source_port]           if args[:sport]
+        results[:sport]      = normalize_source(args[:source_port], port: true)[:source_port]     if args[:source_port]
+        results[:dst]        = normalize_destination(args[:dst])[:destination]                    if args[:dst]
+        results[:dst]        = normalize_destination(args[:destination])[:destination]            if args[:destination]
+        results[:dport]      = normalize_destination(args[:dport], port: true)[:destination_port] if args[:dport]
+        results[:limit]      = normalize_table(args[:limit])[:limit]                              if args[:limit] # @todo Verify this works properly.
+        results[:log_prefix] = normalize_log_prefix(args[:log_prefix])[:log_prefix]               if args[:log_prefix] # @todo Verify this works properly.
+        results[:ip_range]   = normalize_state(args[:ip_range])[:ip_range]                        if args[:ip_range] # @todo Verify this works properly.
+        results[:table]      = normalize_table(args[:table])[:table]                              if args[:table] # @todo Verify this works properly.
+        results[:state]      = normalize_state(args[:state])[:state]                              if args[:state] # @todo Verify this works properly.
+        results[:states]     = normalize_states(args[:states])[:states]                           if args[:states] # @todo Verify this works properly.
+        results[:icmp_type]  = normalize_states(args[:icmp_type])[:icmp_type]                     if args[:icmp_type] # @todo Verify this works properly.
+        results[:comment]    = normalize_comment(args[:comment])[:comment]                        if args[:comment] # @todo Verify this works properly.
+        results[:dport]      = normalize_destination(args[:destination_port], port: true)[:destination_port] if args[:destination_port] # lol
         results
       end
 
@@ -117,6 +151,70 @@ module Iptablez
           { goto: arg }
         else
           goto(target: arg)
+        end
+      end
+      
+      def self.ip_range(arg)
+        if arg["-m iprange"]
+          { ip_range: arg }
+        else
+          ip_range(ip_range: arg)
+        end
+      end
+      
+      def self.normalize_icmp_type(arg)
+        if arg["--icmp-type"]
+          { icmp_type: arg }
+        else
+          icmp_type(icmp_type: arg)
+        end
+      end
+      
+      def self.normalize_log_level(arg)
+        if arg["--log-level"]
+          { log_level: arg }
+        else
+          log_level(log_level: arg)
+        end
+      end
+      
+      def self.normalize_log_prefix(arg)
+        if arg["--log-prefix"]
+          { log_prefix: arg }
+        else
+          log_prefix(log_prefix: arg)
+        end
+      end
+     
+      def self.normalize_limit(arg)
+        if arg["-m limit --limit"]
+          { limit: arg }
+        else
+          limit(limit: arg)
+        end
+      end
+      
+      def self.normalize_to(arg)
+        if arg["--to"]
+          { to: arg }
+        else
+          to(to: arg)
+        end
+      end
+      
+      def self.normalize_state(arg)
+        if arg["-m state --state"]
+          { state: arg }
+        else
+          state(state: arg)
+        end
+      end
+      
+      def self.normalize_states(arg)
+        if arg["-m state --state"]
+          { states: arg }
+        else
+          state(states: arg)
         end
       end
       
