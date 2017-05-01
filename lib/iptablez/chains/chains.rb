@@ -264,6 +264,18 @@ module Iptablez
         Commands::AppendChain.chains(names: names, continue: continue, **args)
       end
     end
+    
+    def self.policy(target:, name: false, names: [], error: false, continue: !error)
+      if name
+        Commands::Policy.chain(target: target, name: name, continue: continue) do |result|
+          yield result if block_given?
+        end
+      elsif !names.empty?
+        Commands::Policy.chains(target: target, names: names, continue: continue) do |result|
+          yield result if block_given?
+        end  
+      end
+    end
 
   end
 
