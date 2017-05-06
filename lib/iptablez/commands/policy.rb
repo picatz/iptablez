@@ -3,22 +3,10 @@ module Iptablez
     module Policy 
       # Move on Module
       include MoveOn
+      include DetermineError
 
-      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
-      KNOWN_ERRORS         = [NO_CHAIN_MATCH_ERROR].freeze
-      
-      # @api private
-      # Determine a given error. Optionally a chain can be used to provide better context.
-      private_class_method def self.determine_error(error:, chain: false)
-        if error == NO_CHAIN_MATCH_ERROR
-          raise ChainExistenceError, "#{chain} doesn't exist!"
-        else
-          raise error
-        end
-      end
-
-      def self.list(chain: false, chains: false)
-        o, e, s = Open3.capture3(Iptablez.bin_path, '-S')
+      def self.list(table: "filter", chain: false, chains: false)
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-t', table.shellescape, '-S')
         e.strip!
         if s.success?
           if chain
@@ -44,10 +32,9 @@ module Iptablez
         end
       end
 
-
-      def self.all(target:, error: false, continue: !error)
+      def self.all(table: "filter", target:, error: false, continue: !error)
         if target
-          chains(names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
+          chains(table: table, names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
             yield result if block_given?
           end
         else
@@ -57,14 +44,14 @@ module Iptablez
         end  
       end
 
-      def self.defaults(target:, error: false, continue: !error)
-        chains(names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
+      def self.defaults(table: "filter", target:, error: false, continue: !error)
+        chains(table: table, names: Iptablez::Chains.defaults, target: target, continue: continue) do |result|
           yield result if block_given?
         end
       end
 
-      def self.chain(name:, target:, error: false, continue: !error)
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-P', name, target)      
+      def self.chain(table: "filter", name:, target:, error: false, continue: !error)
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-t', table.shellescape, '-P', name, target)      
         e.strip!
         if s.success?
           yield [name, target, true] if block_given?
@@ -77,11 +64,11 @@ module Iptablez
         end
       end
 
-      def self.chains(names:, target:, error: false, continue: !error)
+      def self.chains(table: "filter", names:, target:, error: false, continue: !error)
         results = {}
         names.each do |name|
           results[name] = {}
-          results[name][target] = chain(name: name, target: target, continue: continue) do |result|
+          results[name][target] = chain(table: table, name: name, target: target, continue: continue) do |result|
             yield result if block_given?
           end
         end

@@ -17,8 +17,8 @@ module Iptablez
     #
     # @yield Each chain if a block is given.
     # @return [Array<String>] An array of chain names.
-    def self.all
-      chains = Commands::List.full.find_all do |line| 
+    def self.all(table: "filter")
+      chains = Commands::List.full(table: table).find_all do |line| 
         line if line.split[0] == "Chain" 
       end.map(&:split).collect { |array| array[1] }
       chains.each { |c| yield c } if block_given?
@@ -38,8 +38,8 @@ module Iptablez
     #
     # @yield Each chain name and policy if a block is given.
     # @return [Hash] Key value pairing of each chain and its default policy.
-    def self.policies(names: Iptablez::Chains.defaults, error: false, continue: !error)
-      Commands::List.defaults(names: names, continue: continue) do |result|
+    def self.policies(table: "filter", names: Iptablez::Chains.defaults, error: false, continue: !error)
+      Commands::List.defaults(table: table, names: names, continue: continue) do |result|
         yield result if block_given?
       end
     end
@@ -82,16 +82,16 @@ module Iptablez
     # 
     # @yield results if a block is given.
     # @return [Hash] key value pairing of each chain and the result of the check.
-    def self.user_defined?(name: false, names: [])
+    def self.user_defined?(table: "filter", name: false, names: [])
       if name && names.empty?
-        r = user_defined.include?(name)
+        r = user_defined(table: table).include?(name)
         return r unless block_given?
         yield r
       elsif names[0] && ! name
         r = {}
         names.each do |n|
           r.clear if block_given?
-          r[n] = user_defined.include?(n)
+          r[n] = user_defined(table: table).include?(n)
           yield r.flatten if block_given?
         end
         return r unless block_given? 
@@ -106,7 +106,7 @@ module Iptablez
     #
     # @yield Each name of the user defined chains if a block if given.
     # @return [Array<String>] Easy user defined chain as an array.
-    def self.user_defined
+    def self.user_defined(table: "filter")
       user_defined_chains = all.find_all { |c| c unless DEFAULT.include?(c) }
       return user_defined_chains unless block_given?
       user_defined_chains.each { |c| yield c }
@@ -117,7 +117,7 @@ module Iptablez
     # @param name [String] Single name.
     # @param names [Array<String>] Multiple names.
     # @return [Boolean] Easy user defined chain as an array.
-    def self.exists?(name: false, names: [])
+    def self.exists?(table: "filter", name: false, names: [])
       if name
         all do |chain| 
           if chain == name 
@@ -136,12 +136,29 @@ module Iptablez
       end
     end
 
-    def self.defaults
-      return DEFAULT unless block_given?
-      DEFAULT.each { |c| yield c } 
+    def self.defaults(table: "filter")
+      case table
+      when "filter"
+        [ "INPUT", "FORWARD", "OUTPUT" ].each { |chain| yield chain } if block_given? 
+        [ "INPUT", "FORWARD", "OUTPUT" ] 
+      when "nat"
+        [ "PREROUTING", "INPUT", "OUTPUT", "POSTROUTING" ].each { |chain| yield chain } if block_given? 
+        [ "PREROUTING", "INPUT", "OUTPUT", "POSTROUTING" ] 
+      when "mangle"
+        [ "PREROUTING", "INPUT", "FORWARD", "OUTPUT", "POSTROUTING" ].each { |chain| yield chain } if block_given?
+        [ "PREROUTING", "INPUT", "FORWARD", "OUTPUT", "POSTROUTING" ]
+      when "raw"
+        [ "PREROUTING", "OUTPUT" ].each { |chain| yield chain } if block_given?
+        [ "PREROUTING", "OUTPUT" ]
+      when "security"
+        [ "INPUT", "FORWARD", "OUTPUT" ].each { |chain| yield chain } if block_given?
+        [ "INPUT", "FORWARD", "OUTPUT" ]
+      else
+        false
+      end
     end
 
-    def self.policy?(name: false, policy: false, names: [])
+    def self.policy?(table: "filter", name: false, policy: false, names: [])
       if name && names.empty?
         r = if policies[name] == policy
               true

@@ -3,10 +3,8 @@ module Iptablez
     module FlushChain
       # Move on Module
       include MoveOn
+      include DetermineError
 
-      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
-      KNOWN_ERRORS = [NO_CHAIN_MATCH_ERROR].freeze
-     
       # Flush all of the possible `iptables` chains.
       # @example Basic Usage
       #   Iptablez::Commands::Flush.all
@@ -15,8 +13,8 @@ module Iptablez
       #   Iptablez::Commands::Flush.all do |name, result|
       #     puts "#{name} flushed!" if result
       #   end
-      def self.all(names: Iptablez::Chains.all, error: false, continue: !error) 
-        chains(names: names, continue: continue) do |name, result|
+      def self.all(table: "filter", names: Iptablez::Chains.all, error: false, continue: !error) 
+        chains(table: table, names: names, continue: continue) do |name, result|
           yield [name, result] if block_given?
         end
       end
@@ -32,9 +30,9 @@ module Iptablez
       #   Iptablez::Commands::Flush.chain(name: "INPUT") do |name, result|
       #     puts "#{name} flushed" if result
       #   end
-      def self.chain(name:, error: false, continue: !error)
+      def self.chain(table: "filter", name:, error: false, continue: !error)
        name = name.to_s unless name.is_a? String 
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-F', name.shellescape)      
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-F', name.shellescape, '-t', table.shellescape)      
         e.strip!
         if s.success?
           yield [name, true] if block_given?
@@ -56,16 +54,15 @@ module Iptablez
       #   Iptablez::Commands::Flush.chains(names: ["dogs", "cats"]) do |name, result|
       #     puts "#{name} flushed" if result
       #   end
-      def self.chains(names:, error: false, continue: !error)
+      def self.chains(table: "filter", names:, error: false, contable: "filter", tinue: !error)
         results = {}
         names.each do |name|
-          results[name] = chain(name: name, continue: continue) do |name, result|
+          results[name] = chain(table: table, name: name, continue: continue) do |name, result|
             yield [name, result] if block_given?
           end
         end
         results
       end
-
 
     end
   end

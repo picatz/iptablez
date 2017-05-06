@@ -3,20 +3,7 @@ module Iptablez
     module NewChain
       # Move on Module
       include MoveOn
-
-      CHAIN_ALREADY_EXITS_ERROR = 'iptables: Chain already exists.'
-      KNOWN_ERRORS = [CHAIN_ALREADY_EXITS_ERROR] 
-
-      # @api private
-      # Determine a given error. Optionally a chain can be used to provide better context.
-      private_class_method def self.determine_error(error:, chain: false)
-        error.strip!
-        if error == CHAIN_ALREADY_EXITS_ERROR 
-          raise ChainAlreadyExistsError, "#{chain} already exist!"
-        else
-          raise error
-        end
-      end
+      include DetermineError 
 
       # Create a new chain of a given +name+, unless is already exists. This is the heart of the module.
       # @param name     [String]  Single chain +name+.
@@ -30,9 +17,9 @@ module Iptablez
       #   # => false
       # @yield  [String, Boolean] The +name+ of the chain and +result+ of the operation if a block if given.
       # @return [String, Boolean] Key value pairing of the given chain +name+ and the +result+ of the operation.
-      def self.chain(name:, error: false, continue: !error)
+      def self.chain(table: "filter", name:, error: false, continue: !error)
         name = name.to_s unless name.is_a? String
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-N', name.shellescape)
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-N', name.shellescape, '-t', table.shellescape)
         e.strip! # remove new line 
         if s.success?
           yield [name, true] if block_given?
@@ -56,10 +43,10 @@ module Iptablez
       #
       # @yield  [String, Boolean] The +name+ of the chain and +result+ of the operation if a block if given.
       # @return [Hash]            Key value pairing of each given chain +name+ and the +result+ of the operation.
-      def self.chains(names:, error: false, continue: !error)
+      def self.chains(table: "filter", names:, error: false, continue: !error)
         results = {}
         names.each do |name|
-          chain(name: name, continue: continue) do |name, result|
+          chain(table: table, name: name, continue: continue) do |name, result|
             yield [name, result] if block_given?
             results[name] = result
           end

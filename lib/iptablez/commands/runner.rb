@@ -6,7 +6,24 @@ module Iptablez
       # Move on Module
       include MoveOn
       include ArgumentHelpers
-      include DetermineError 
+
+      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
+      KNOWN_ERRORS = [NO_CHAIN_MATCH_ERROR].freeze
+
+      # @api private
+      # Determine a given error. Optionally a chain can be used to provide better context.
+      private_class_method def self.determine_error(error:, chain: false)
+        # @todo Catch better erorrs. 
+        # Default will probably not ChainNotEmpty if it's not a ChainExistenceError.
+        if error == NO_CHAIN_MATCH_ERROR
+          raise ChainExistenceError, "#{chain} doesn't exist!"
+        elsif
+          warn "Don't believe everything a program says!"
+          raise ChainNotEmpty, "#{chain} is not empty! Will probably need to flush (-F) it to delete it!" 
+        else
+          raise error
+        end
+      end
 
       # Delete a chain of a given +name+. This is the heart of this module.
       # @param name     [String]  Single chain +name+.
@@ -23,10 +40,10 @@ module Iptablez
       # @return [Boolean]         The result of the operation.
       #
       # @raise An error will be raised if the +error+ or +continue+ keywords are +true+ and the operation fails.
-      def self.chain(table: "filter", name:, error: false, continue: !error, **args)
+      def self.chain(name:, error: false, continue: !error, **args)
         name = name.to_s unless name.is_a? String
         name = name.shellescape
-        first_arguments = [Iptablez.bin_path, '-t', table.shellescape, '-A', name.shellescape]
+        first_arguments = [Iptablez.bin_path, '-A', name]
         args = ArgumentHelpers.normalize_arguments(args).values.map(&:split).flatten # fucking crazy shit here
         cmd = first_arguments + args
         _, e, s = Open3.capture3(cmd.join(" "))
@@ -43,10 +60,10 @@ module Iptablez
         end
       end
 
-      def self.chains(table: "filter", names:, error: false, continue: !error, **args)
+      def self.chains(names:, error: false, continue: !error, **args)
         results = {} 
         names.each do |name|
-          results[name] = chain(table: table, name: name, continue: continue, **args) do |name, result|
+          results[name] = chain(name: name, continue: continue, **args) do |name, result|
             yield [name, result] if block_given?
           end
         end

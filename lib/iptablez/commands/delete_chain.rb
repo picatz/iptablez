@@ -5,23 +5,7 @@ module Iptablez
     module DeleteChain
       # Move on Module
       include MoveOn
-
-      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
-      CHAIN_NOT_EMPTY      = 'iptables: Directory not empty.'.freeze
-
-      KNOWN_ERRORS = [NO_CHAIN_MATCH_ERROR, CHAIN_NOT_EMPTY].freeze
-
-      # @api private
-      # Determine a given error. Optionally a chain can be used to provide better context.
-      private_class_method def self.determine_error(error:, chain: false)
-        if error == NO_CHAIN_MATCH_ERROR
-          raise ChainExistenceError, "#{chain} doesn't exist!"
-        elsif
-          raise ChainNotEmpty, "#{chain} is not empty! Will probably need to flush (-F) it to delete it!" 
-        else
-          raise error
-        end
-      end
+      include DetermineError
 
       # Delete all of the user defined chains.
       #
@@ -36,9 +20,9 @@ module Iptablez
       #
       # @yield Each chain name and boolean if it has been successfully deleted.
       # @return [Hash] Key value pairing of each user defined chain and boolean if it has been successfully deleted.
-      def self.all(error: false, continue: !error)
+      def self.all(table: "filter", error: false, continue: !error)
         results = {}
-        chains(names: Iptablez::Chains.user_defined, continue: continue) do |name, result|
+        chains(table: table, names: Iptablez::Chains.user_defined, continue: continue) do |name, result|
           yield [name, result] if block_given?
           results[name] = result
         end
@@ -65,9 +49,9 @@ module Iptablez
       # @return [Boolean]         The result of the operation.
       #
       # @raise An error will be raised if the +error+ or +continue+ keywords are +true+ and the operation fails.
-      def self.chain(name:, error: false, continue: !error)
+      def self.chain(table: "filter", name:, error: false, continue: !error)
         name = name.to_s unless name.is_a? String
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-X', name.shellescape)
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-X', name.shellescape, '-t', table.shellescape)
         e.strip! # remove new line
         if s.success?
           yield [name, true] if block_given?
@@ -91,10 +75,10 @@ module Iptablez
       #
       # @yield  [String, Boolean] The name of the chain and result of the operation if a block if given.
       # @return [Hash]            Key value pairing of each given chain and the result of the operation.
-      def self.chains(names:, error: false, continue: !error)
+      def self.chains(table: "filter", names:, error: false, continue: !error)
         results = {} 
         names.each do |name|
-          results[name] = chain(name: name, continue: continue) do |name, result|
+          results[name] = chain(table: table, name: name, continue: continue) do |name, result|
             yield [name, result] if block_given?
           end
         end

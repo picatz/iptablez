@@ -3,24 +3,8 @@ module Iptablez
     module RenameChain 
       # Move on Module
       include MoveOn
+      include DetermineError
 
-
-      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
-      CHAIN_ALREADY_EXISTS = 'iptables: File exists.'.freeze
-      KNOWN_ERRORS = [NO_CHAIN_MATCH_ERROR, CHAIN_ALREADY_EXISTS].freeze
-
-      # @api private
-      # Determine a given error. Optionally a chain can be used to provide better context.
-      private_class_method def self.determine_error(error:, chain: false)
-        if error == NO_CHAIN_MATCH_ERROR
-          raise ChainExistenceError, "#{chain} doesn't exist!"
-        elsif error == CHAIN_ALREADY_EXISTS
-          raise ChainExistenceError, "#{chain} already exists!"
-        else
-          raise error
-        end
-      end
-      
       # Rename a chain +from+ a given name +to+ a new name. This is the heart of this module.
       # @param from [String] Single chain name to change +from+.
       # @param to   [String] Single chain name to change +to+.
@@ -33,10 +17,10 @@ module Iptablez
       # 
       # @yield  [String, String]
       # @return [Boolean] 
-      def self.chain(from:, to:, error: false, continue: !error)
+      def self.chain(table: "filter", from:, to:, error: false, continue: !error)
         to   = to.to_s   unless to.is_a?   String 
         from = from.to_s unless from.is_a? String
-        _, e, s = Open3.capture3(Iptablez.bin_path, '-E', from.shellescape, to.shellescape)      
+        _, e, s = Open3.capture3(Iptablez.bin_path, '-t', table.shellescape, '-E', from.shellescape, to.shellescape)      
         e.strip!
         if s.success?
           yield [from, to, true] if block_given?
@@ -49,7 +33,7 @@ module Iptablez
         end
       end
 
-      def self.chains(pairs:, error: false, continue: !error)
+      def self.chains(table: "filter", pairs:, error: false, continue: !error)
         results = {}
         pairs.each do |from, to|
           results[from] = {}

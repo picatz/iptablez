@@ -3,25 +3,7 @@ module Iptablez
     module List 
       # Move on Module
       include MoveOn
-     
-      UNKOWN_OPTION        = 'unknown option'.freeze
-      NO_CHAIN_MATCH_ERROR = 'iptables: No chain/target/match by that name.'.freeze
-      PERMISSION_DENIED    = 'Permission denied (you must be root)'.freeze
-      INVALID_RULE_NUMBER  = 'Invalid rule number'.freeze
-
-      KNOWN_ERRORS = [NO_CHAIN_MATCH_ERROR, PERMISSION_DENIED, INVALID_RULE_NUMBER, UNKOWN_OPTION].freeze
-
-      # @api private
-      # Determine a given error. Optionally a chain can be used to provide better context.
-      private_class_method def self.determine_error(error:, chain: false, number: false)
-        if error == NO_CHAIN_MATCH_ERROR
-          raise ChainExistenceError, "#{chain} doesn't exist!"
-        elsif error == INVALID_RULE_NUMBER
-          raise InvalidRuleIndexError, "#{chain} invalid number #{number}!"
-        else
-          raise error
-        end
-      end
+      include DetermineError 
 
       # List all of the `iptables` rules. Note: this will not include policies.
       # @todo Document params.
@@ -36,8 +18,8 @@ module Iptablez
       #   end
       # @yield Each result if a block is given.
       # @return [Hash] key value pairing of each chain and the result of the check.
-      def self.all(error: false, continue: !error)
-        o, e, s = Open3.capture3(Iptablez.bin_path, '-L')      
+      def self.all(table: "filter", error: false, continue: !error)
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', "-t", table)      
         if e["you must be root"]
           e = PERMISSION_DENIED
         else
@@ -65,10 +47,10 @@ module Iptablez
       #   Iptablez::Commands::List.defaults do |name, target|
       #     puts "#{name}: #{target}"
       #   end
-      def self.defaults(names: Iptablez::Chains.defaults, error: false, continue: !error)
+      def self.defaults(table: "filter", names: Iptablez::Chains.defaults(table: table), error: false, continue: !error)
         results = {}
         names.each do |name|
-          result = chain(name: name, policy: true, continue: true)
+          result = chain(table: table, name: name, policy: true, continue: true)
           result = result.map(&:split).map(&:last)[0] if result
           yield [name, result] if block_given?
           results[name] = result
@@ -89,11 +71,11 @@ module Iptablez
       #   end
       # @yield Each result if a block is given.
       # @return [Array] Each line as the result.
-      def self.full(chain: false, error: false, continue: !error)
+      def self.full(table: "filter", chain: false, error: false, continue: !error)
         if chain
-          o, e, s = Open3.capture3(Iptablez.bin_path, '-L', chain)      
+          o, e, s = Open3.capture3(Iptablez.bin_path, '-L', chain.shellescape, '-t', table.shellescape)      
         else
-          o, e, s = Open3.capture3(Iptablez.bin_path, '-L')      
+          o, e, s = Open3.capture3(Iptablez.bin_path, '-L', '-t', table.shellescape)      
         end
         e.strip!
         if s.success?
@@ -117,7 +99,7 @@ module Iptablez
       #   Iptablez::Commands::List.number(chain: "INPUT", number: 1) do |chain, num, result|
       #     puts "Rule #{num} in #{chain} is #{result}" if result
       #   end
-      def self.number(chain:, number:, error: false, continue: !error)
+      def self.number(table: "filter", chain:, number:, error: false, continue: !error)
         if number.is_a? Integer
           if number <= 0 && error
             raise ArgumentError, "Invalid rule number #{number}!"
@@ -125,7 +107,7 @@ module Iptablez
             number = number.to_s
           end
         end
-        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', chain, number)      
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-t', table.shellescape, '-L', chain.shellescape, number.shellescape)      
         e.strip!
         o.strip!
         o = false if o.empty?
@@ -147,8 +129,8 @@ module Iptablez
       #   # => false
       #   Iptablez::Commands::List.number?(chain: "FORWARD", number: 1)
       #   # => true
-      def self.number?(chain:, number:, error: false, continue: !error)
-        if number(chain: chain, number: number, continue: continue)
+      def self.number?(table: "filter", chain:, number:, error: false, continue: !error)
+        if number(table: table, chain: chain, number: number, continue: continue)
           true
         else
           false
@@ -182,11 +164,11 @@ module Iptablez
       #   Iptablez::Commands::List.chain(name: "INPUT", policy: true) do |rule|
       #     puts rule
       #   end
-      def self.chain(name:, policy: false, error: false, continue: !error)
+      def self.chain(table: "filter", name:, policy: false, error: false, continue: !error)
         if policy
-          o, e, s = Open3.capture3(Iptablez.bin_path, '-S', name)      
+          o, e, s = Open3.capture3(Iptablez.bin_path, '-S', name, "-t", table.shellescape)      
         else
-          o, e, s = Open3.capture3(Iptablez.bin_path, '-L', name)      
+          o, e, s = Open3.capture3(Iptablez.bin_path, '-L', name, "-t", table.shellescape)      
         end
         e.strip!
         if s.success?
@@ -200,10 +182,10 @@ module Iptablez
         end 
       end
 
-      def self.chains(names:, policy: false, error: false, continue: !error)
+      def self.chains(table: "filter", names: Iptablez::Chains.defaults(table: table), policy: false, error: false, continue: !error)
         results = {} 
         names.each do |name|
-          results[name] = chain(name: name, policy: policy, continue: continue) do |name, result|
+          results[name] = chain(table: table, name: name, policy: policy, continue: continue) do |name, result|
             yield [name, result] if block_given?
           end
         end

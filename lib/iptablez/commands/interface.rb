@@ -3,7 +3,7 @@ module Iptablez
     # @todo Add inline document to this.
     module Interface 
     
-      def self.delete_chain(name: false, all: false)
+      def self.delete_chain(table: "filter", name: false, all: false)
         if name
           DeleteChain.chain(name: name)
         elsif all
@@ -13,7 +13,7 @@ module Iptablez
         end
       end
 
-      def self.flush(chain: false, all: true)
+      def self.flush(table: "filter", chain: false, all: true)
         if chain
           Flush.chain(name: chain)
         elsif all
@@ -23,7 +23,7 @@ module Iptablez
         end
       end  
    
-      def self.list(chain: false, all: true, number: false) 
+      def self.list(table: "filter", chain: false, all: true, number: false) 
         if chain && ! number
           List.chain(name: chain)  
         elsif number && chain
@@ -35,11 +35,11 @@ module Iptablez
         end 
       end
 
-      def self.new_chain(name:) 
+      def self.new_chain(table: "filter", name:) 
         NewChain.chain(name: name)
       end
 
-      def self.policy(target:, chain: false, all: true)
+      def self.policy(table: "filter", target:, chain: false, all: true)
         if chain && target
           Policy.chain(name: chain, target: target)
         elsif all && target
@@ -49,7 +49,7 @@ module Iptablez
         end
       end
 
-      def self.rename_chain(from:, to:)
+      def self.rename_chain(table: "filter", from:, to:)
         if from && to
           RenameChain.chain(from: from, to: to)
         else
@@ -65,7 +65,7 @@ module Iptablez
         end
       end
 
-      def self.zero(all: true, chain: false)
+      def self.zero(table: "filter", all: true, chain: false)
         if chain
           Zero.chain(name: chain)
         elsif all 
