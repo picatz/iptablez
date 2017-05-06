@@ -107,7 +107,7 @@ module Iptablez
     # @yield Each name of the user defined chains if a block if given.
     # @return [Array<String>] Easy user defined chain as an array.
     def self.user_defined(table: "filter")
-      user_defined_chains = all(table: table).find_all { |c| c unless DEFAULT.include?(c) }
+      user_defined_chains = all(table: table).find_all { |c| c unless Iptablez::Table.default_chains(name: table).include?(c) }
       return user_defined_chains unless block_given?
       user_defined_chains.each { |c| yield c }
     end
