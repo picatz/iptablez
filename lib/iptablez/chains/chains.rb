@@ -223,36 +223,36 @@ module Iptablez
       Commands::AppendChain
     end
 
-    def self.create(name: false, names: [], error: false, continue: !error)
+    def self.create(name: false, names: false, error: false, continue: !error)
       if name
         Commands::NewChain.chain(name: name, continue: continue) do |result|
           yield result if block_given?
         end
-      elsif !names.empty?
+      elsif names
         Commands::NewChain.chains(names: names, continue: continue) do |result|
           yield result if block_given?
         end  
       end
     end
 
-    def self.delete(name: false, names: [], error: false, continue: !error)
+    def self.delete(name: false, names: false, error: false, continue: !error)
       if name 
         Commands::DeleteChain.chain(name: name, continue: continue) do |result|
           yield result if block_given?
         end
-      elsif !names.empty?
+      elsif names
         Commands::DeleteChain.chains(names: names, continue: continue) do |result|
           yield result if block_given?
         end
       end
     end
 
-    def self.flush(name: false, names: [], error: false, continue: !error)
+    def self.flush(name: false, names: false, error: false, continue: !error)
       if name
         Commands::FlushChain.chain(name: name, continue: continue) do |result|
           yield result if block_given?
         end
-      elsif !names.empty?
+      elsif names
         Commands::FlushChain.chains(names: names, continue: continue) do |result|
           yield result if block_given?
         end
@@ -274,20 +274,20 @@ module Iptablez
       end
     end
     
-    def self.append(name: false, names: [], error: false, continue: !error, **args)
+    def self.append(name: false, names: false, error: false, continue: !error, **args)
       if name
         Commands::AppendChain.chain(name: name, continue: continue, **args)
-      elsif !names.empty?
+      elsif names
         Commands::AppendChain.chains(names: names, continue: continue, **args)
       end
     end
     
-    def self.policy(target:, name: false, names: [], error: false, continue: !error)
+    def self.policy(target:, name: false, names: false, error: false, continue: !error)
       if name
         Commands::Policy.chain(target: target, name: name, continue: continue) do |result|
           yield result if block_given?
         end
-      elsif !names.empty?
+      elsif names
         Commands::Policy.chains(target: target, names: names, continue: continue) do |result|
           yield result if block_given?
         end  

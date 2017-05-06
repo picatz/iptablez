@@ -37,7 +37,7 @@ module Iptablez
         results = {}
         pairs.each do |from, to|
           results[from] = {}
-          results[from][to] = chain(from: from, to: to, continue: continue) do |from, to, result|
+          results[from][to] = chain(table: table, from: from, to: to, continue: continue) do |from, to, result|
             yield [from, to, result] if block_given?
           end
         end

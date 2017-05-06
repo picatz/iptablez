@@ -19,7 +19,7 @@ module Iptablez
       # @yield Each result if a block is given.
       # @return [Hash] key value pairing of each chain and the result of the check.
       def self.all(table: "filter", error: false, continue: !error)
-        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', "-t", table)      
+        o, e, s = Open3.capture3(Iptablez.bin_path, '-L', "-t", table.shellescape)      
         if e["you must be root"]
           e = PERMISSION_DENIED
         else
@@ -50,7 +50,7 @@ module Iptablez
       def self.defaults(table: "filter", names: Iptablez::Chains.defaults(table: table), error: false, continue: !error)
         results = {}
         names.each do |name|
-          result = chain(table: table, name: name, policy: true, continue: true)
+          result = chain(table: table.shellescape, name: name.shellescape, policy: true, continue: true)
           result = result.map(&:split).map(&:last)[0] if result
           yield [name, result] if block_given?
           results[name] = result
@@ -185,7 +185,7 @@ module Iptablez
       def self.chains(table: "filter", names: Iptablez::Chains.defaults(table: table), policy: false, error: false, continue: !error)
         results = {} 
         names.each do |name|
-          results[name] = chain(table: table, name: name, policy: policy, continue: continue) do |name, result|
+          results[name] = chain(table: table.shellescape, name: name.shellescape, policy: policy.shellescape, continue: continue) do |name, result|
             yield [name, result] if block_given?
           end
         end
