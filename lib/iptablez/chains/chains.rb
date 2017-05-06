@@ -98,7 +98,7 @@ module Iptablez
       elsif names[0] && name
         raise "Cannot use both a single name and multiple names together."
       else
-        all.count > 3 ? true : false
+        all(table: table).count > Iptablez::Table.default_chains(name: table).count ? true : false
       end
     end
 
@@ -107,7 +107,7 @@ module Iptablez
     # @yield Each name of the user defined chains if a block if given.
     # @return [Array<String>] Easy user defined chain as an array.
     def self.user_defined(table: "filter")
-      user_defined_chains = all.find_all { |c| c unless DEFAULT.include?(c) }
+      user_defined_chains = all(table: table).find_all { |c| c unless DEFAULT.include?(c) }
       return user_defined_chains unless block_given?
       user_defined_chains.each { |c| yield c }
     end
@@ -119,7 +119,7 @@ module Iptablez
     # @return [Boolean] Easy user defined chain as an array.
     def self.exists?(table: "filter", name: false, names: [])
       if name
-        all do |chain| 
+        all(table: table) do |chain| 
           if chain == name 
             yield [name, true] if block_given?
             return true
@@ -129,7 +129,7 @@ module Iptablez
         results = {}
         names.each do |name|
           results[name] = false
-          all { |chain| results[name] = true if chain == name }
+          all(table: table) { |chain| results[name] = true if chain == name }
           yield [name, results[name]] if block_given?
         end
         results

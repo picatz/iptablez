@@ -9,8 +9,12 @@ module Iptablez
     def self.policies(name: "filter")
       Iptablez::Commands::Policy.list(table: name)
     end
-
+    
     def self.chains(name: "filter")
+      Iptablez::Chains.all(table: name)
+    end
+
+    def self.default_chains(name: "filter")
       Iptablez::Chains.defaults(table: name)
     end
      
